@@ -1,4 +1,5 @@
 import * as tf from '@tensorflow/tfjs';
+import * as tfVis from '@tensorflow/tfjs-vis';
 /**
  * 身高体重模型
  */
@@ -10,6 +11,18 @@ export class HeightAndWeightModel {
   constructor(height: number = 180) {
     const heights = [150, 160, 170, 180, 185];
     const weights = [40, 50, 60, 70, 80];
+    tfVis.render.scatterplot(
+        {
+          name: '身高体重训练数据',
+        },
+        {
+          values: heights.map((item, index) => ({x: item, y: weights[index]})),
+        },
+        {
+          xAxisDomain: [140, 200],
+          yAxisDomain: [30, 100],
+        },
+    ).then((r) => {});
     // 数据归一化
     const inputs = tf.tensor(heights).sub(150).div(20);
     const labels = tf.tensor(weights).sub(40).div(20);
@@ -30,6 +43,7 @@ export class HeightAndWeightModel {
       // 批量数据
       batchSize: 5,
       epochs: 200,
+      callbacks: tfVis.show.fitCallbacks({name: '训练过程'}, ['loss']),
     }).then(() => {
       const output: any = model.predict(tf.tensor([height]).sub(150).div(20));
       console.log(output.mul(20).add(40).dataSync()[0].toFixed(2) + 'kg');
